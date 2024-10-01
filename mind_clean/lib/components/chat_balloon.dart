@@ -35,8 +35,8 @@ class ChatBalloon extends StatelessWidget {
             ),
             CircleAvatar(
               radius: 20,
-              backgroundImage: AssetImage(
-                  'assets/images/user_image.png'), // Substitua pelo caminho da imagem do usuário
+              // backgroundImage: AssetImage(
+              //     'assets/images/user_image.png'), // Substitua pelo caminho da imagem do usuário
             ),
           ] else ...[
             CircleAvatar(
