@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mind_clean/models/auth.dart';
 import 'package:mind_clean/pages/chat_page.dart';
+import 'package:mind_clean/pages/forgot_password_page.dart';
 import 'package:mind_clean/utils/app_routes.dart';
 import 'package:mind_clean/pages/auth_page.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
           routes: {
             AppRoutes.AUTH: (ctx) => const AuthPage(),
             AppRoutes.CHAT: (ctx) => const ChatPage(),
+            AppRoutes.FORGOT_PASSWORD: (ctx) => const ForgotPasswordPage(),
           }),
     );
   }

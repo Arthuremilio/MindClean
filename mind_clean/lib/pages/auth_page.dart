@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mind_clean/components/auth_form.dart';
+import 'package:mind_clean/utils/app_routes.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -9,13 +10,8 @@ class AuthPage extends StatelessWidget {
     return Scaffold(
       body: Container(
         color: Theme.of(context).colorScheme.primary,
-        child: SingleChildScrollView(
-          child: Container(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context)
-                  .size
-                  .height, // Preenche a altura da tela
-            ),
+        child: Center(
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,

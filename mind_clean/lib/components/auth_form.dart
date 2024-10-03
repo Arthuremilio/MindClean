@@ -93,7 +93,7 @@ class _AuthFormState extends State<AuthForm> {
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
-        height: 450,
+        height: _isLogin() ? 350 : 450,
         width: deviceSize.width * 0.80,
         child: Form(
           key: _formKey,
@@ -175,12 +175,29 @@ class _AuthFormState extends State<AuthForm> {
                   child: ElevatedButton(
                     onPressed: _submit,
                     child: Text(
-                        _authMode == AuthMode.Login ? 'Entrar' : 'Registrar'),
+                      _authMode == AuthMode.Login ? 'Entrar' : 'Registrar',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pushNamed(AppRoutes.FORGOT_PASSWORD);
+                    },
+                    child: Text(
+                      'Esqueceu a senha?',
+                      style: TextStyle(color: Colors.blueGrey[200]),
+                    ),
+                  ),
+                ],
+              ),
               TextButton(
                 onPressed: _switchAuthMode,
                 child: Text(_isLogin()
