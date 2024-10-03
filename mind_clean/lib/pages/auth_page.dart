@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mind_clean/components/auth_form.dart';
-import 'package:mind_clean/utils/app_routes.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});

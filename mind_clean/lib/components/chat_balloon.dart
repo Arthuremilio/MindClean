@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:io'; // Para trabalhar com arquivos locais de imagem
 
 class ChatBalloon extends StatelessWidget {
-  final String message;
+  final String? message; // Texto da mensagem
+  final File? image; // Arquivo de imagem (pode ser null se for texto)
   final bool isUserMessage;
 
   const ChatBalloon({
     Key? key,
-    required this.message,
+    this.message, // Texto pode ser null se for uma imagem
+    this.image, // Imagem pode ser null se for uma mensagem de texto
     required this.isUserMessage,
   }) : super(key: key);
 
@@ -27,22 +30,28 @@ class ChatBalloon extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  message,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                child: image != null // Verifica se é uma imagem
+                    ? Image.file(
+                        image!,
+                        fit: BoxFit.cover,
+                        height:
+                            150, // Ajuste a altura da imagem conforme necessário
+                      )
+                    : Text(
+                        message ?? '', // Se não for imagem, exibe o texto
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
               ),
             ),
             CircleAvatar(
               radius: 20,
-              // backgroundImage: AssetImage(
-              //     'assets/images/user_image.png'), // Substitua pelo caminho da imagem do usuário
+              // Aqui você pode adicionar uma imagem/avatar do usuário
             ),
           ] else ...[
             CircleAvatar(
               radius: 20,
               backgroundImage: AssetImage(
-                  'lib/assets/img/mind_clean_logo.png'), // Substitua pelo caminho da imagem do usuário
+                  'lib/assets/img/mind_clean_logo.png'), // Logo da aplicação
             ),
             Expanded(
               child: Container(
@@ -52,10 +61,17 @@ class ChatBalloon extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  message,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                child: message != null // Verifica se é uma mensagem de texto
+                    ? Text(
+                        message!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      )
+                    : Image.file(
+                        image!,
+                        fit: BoxFit.cover,
+                        height:
+                            150, // Ajuste a altura da imagem conforme necessário
+                      ),
               ),
             ),
           ],
