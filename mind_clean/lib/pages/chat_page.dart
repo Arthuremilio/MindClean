@@ -6,8 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:mind_clean/utils/app_routes.dart';
 import 'dart:convert';
-import 'package:gemini_ai/gemini_ai.dart';
-import 'package:gemini_ai/model/generative_model.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -104,23 +103,18 @@ class _ChatPageState extends State<ChatPage> {
     if (pickedFile == null) return;
 
     try {
-      final GeminiAi _gemini = GeminiAi();
-      const apiKey = 'AIzaSyCoYXc-vW7x5hSuzYtwhMaJc6llVxfee7Y';
-      GenerativeModel generativeModel = GenerativeModel(
-        modelName: "gemini-pro",
-        apiKey: apiKey,
+      final bytes = await pickedFile.readAsBytes();
+      final String base64Image = base64Encode(bytes);
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash-latest',
+        apiKey: 'AIzaSyCoYXc-vW7x5hSuzYtwhMaJc6llVxfee7Y',
       );
       final prompt =
-          "Descreva a expressão facial da pessoa na imagem e o que ela está vestindo.";
-      final response = await _gemini.generateContent(
-        generativeModel,
-        prompt,
-        images: [File(pickedFile.path)],
-      );
-      await Future.wait([
-        _sendImage(pickedFile),
-        _sendDescriptionImage(response ?? ''),
-      ]);
+          "Describe the following image in Brazilian Portuguese: Base64: $base64Image";
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+      _sendDescriptionImage(response.text ?? '');
+      _sendImage(pickedFile);
     } catch (error) {
       print("Erro no processamento da imagem e descrição: $error");
     }
