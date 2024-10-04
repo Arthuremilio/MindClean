@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:mind_clean/components/chat_balloon.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
+import 'package:mind_clean/components/chat_balloon.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:mind_clean/utils/app_routes.dart';
+import 'dart:convert';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -15,7 +18,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
-
   final List<ChatBalloon> _messages = [
     ChatBalloon(
       message: 'Texto da mensagem do sistema',
@@ -26,44 +28,107 @@ class _ChatPageState extends State<ChatPage> {
       isUserMessage: true,
     ),
   ];
-  // Método para enviar uma imagem selecionada da galeria
+
   Future<void> _sendImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    _handlePickedFile(pickedFile);
+    _sendImage(pickedFile);
   }
 
-  // Método para tirar uma foto com a câmera
   Future<void> _sendImageFromCamera() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    _handlePickedFile(pickedFile);
+    _sendImage(pickedFile);
   }
 
-  // Lida com o arquivo selecionado ou capturado
-  Future<void> _handlePickedFile(XFile? pickedFile) async {
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+  Future<void> _sendImage(XFile? pickedFile) async {
+    if (pickedFile == null) return;
 
-      if (_image != null) {
-        String docId = 'id_do_documento'; // Substitua pelo ID real do documento
+    try {
+      final imageBytes = await pickedFile.readAsBytes();
+      final base64Image = base64Encode(imageBytes);
 
-        await FirebaseFirestore.instance
-            .collection('messages')
-            .doc(docId)
-            .update({
-          "image": _image!.path,
-        });
+      final response = await http.post(
+        Uri.parse(
+            'https://mind-clean-default-rtdb.firebaseio.com/historyChat.json'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "image": base64Image,
+          "isUserMessage": true,
+        }),
+      );
 
-        String responseText = 'Texto da resposta do servidor';
-
+      if (response.statusCode == 200) {
         setState(() {
-          _messages.insert(0, ChatBalloon(image: _image, isUserMessage: true));
           _messages.insert(
-              0, ChatBalloon(message: responseText, isUserMessage: false));
-          _image = null; // Reseta a imagem após enviar
+            0,
+            ChatBalloon(image: File(pickedFile.path), isUserMessage: true),
+          );
         });
+      } else {
+        print('Erro ao enviar a imagem: ${response.statusCode}');
       }
+    } catch (error) {
+      print("Erro ao enviar a imagem: $error");
+    }
+  }
+
+  Future<void> _sendDescriptionImage(String description) async {
+    if (description == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'https://mind-clean-default-rtdb.firebaseio.com/historyChat.json'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "Message": description,
+          "isUserMessage": false,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _messages.insert(
+            0,
+            ChatBalloon(message: description, isUserMessage: false),
+          );
+        });
+      } else {
+        print('Erro ao enviar a imagem: ${response.statusCode}');
+      }
+    } catch (error) {
+      print("Erro ao enviar a imagem: $error");
+    }
+  }
+
+  Future<void> processImageAndSend(XFile pickedFile) async {
+    if (pickedFile == null) return;
+
+    try {
+      const apiKey = 'AIzaSyDId0AqrYpHBO3OffEPkZnajZQRvz3S-z4';
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash-latest',
+        apiKey: apiKey,
+      );
+
+      final prompt =
+          'Descreva de maneira resumida se existe uma pessoa na imagem.';
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.files
+          .add(await http.MultipartFile.fromPath('image', pickedFile.path));
+      request.fields['prompt'] = prompt;
+      request.headers['Authorization'] = 'Bearer $apiKey';
+
+      var geminiResponse = await request.send();
+      if (geminiResponse.statusCode != 200) {
+        print('Erro ao gerar a descrição: ${geminiResponse.statusCode}');
+        return;
+      }
+
+      final geminiResponseBody = await geminiResponse.stream.bytesToString();
+      _sendImage(pickedFile);
+      _sendDescriptionImage(geminiResponseBody);
+    } catch (error) {
+      print("Erro no processamento da imagem e descrição: $error");
     }
   }
 
@@ -76,7 +141,8 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         actions: [
           IconButton(
-            onPressed: () => {},
+            onPressed: () =>
+                Navigator.of(context).pushReplacementNamed(AppRoutes.AUTH),
             icon: Icon(
               Icons.logout,
               color: Colors.white,
@@ -92,25 +158,24 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.all(16.0),
               itemCount: _messages.length,
               itemBuilder: (ctx, index) {
-                // Retorna cada ChatBalloon diretamente da lista
                 return _messages[index];
               },
             ),
           ),
-          Divider(
-            color: Colors.white,
-          ),
+          Divider(color: Colors.white),
           Padding(
             padding: const EdgeInsets.all(50.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 FloatingActionButton(
+                  heroTag: 'Gallery',
                   onPressed: _sendImageFromGallery,
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
                 FloatingActionButton(
+                  heroTag: 'Camera',
                   onPressed: _sendImageFromCamera,
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.camera_alt, color: Colors.white),
