@@ -184,8 +184,16 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  gemini_ai:
+    dependency: "direct main"
+    description:
+      name: gemini_ai
+      sha256: "3a14f7b68750255fca099e207aa76bae0356179a03d8f26bf6a65b31f42c61be"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   http:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: http
       sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
@@ -201,7 +209,7 @@ packages:
     source: hosted
     version: "4.0.2"
   image_picker:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: image_picker
       sha256: b6951e25b795d053a6ba03af5f710069c99349de9341af95155d52665cb4607c
@@ -353,7 +361,7 @@ packages:
     source: hosted
     version: "2.1.8"
   provider:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: provider
       sha256: "59471e0a4595e264625d3496af567ac85bdae1148ec985aff1e0555786f53ecf"

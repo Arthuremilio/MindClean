@@ -6,7 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:mind_clean/utils/app_routes.dart';
 import 'dart:convert';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:gemini_ai/gemini_ai.dart';
+import 'package:gemini_ai/model/generative_model.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -16,7 +17,6 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  File? _image;
   final ImagePicker _picker = ImagePicker();
   final List<ChatBalloon> _messages = [
     ChatBalloon(
@@ -31,12 +31,12 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _sendImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    _sendImage(pickedFile);
+    processImageAndSend(pickedFile);
   }
 
   Future<void> _sendImageFromCamera() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    _sendImage(pickedFile);
+    processImageAndSend(pickedFile);
   }
 
   Future<void> _sendImage(XFile? pickedFile) async {
@@ -100,33 +100,27 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Future<void> processImageAndSend(XFile pickedFile) async {
+  Future<void> processImageAndSend(XFile? pickedFile) async {
     if (pickedFile == null) return;
 
     try {
-      const apiKey = 'AIzaSyDId0AqrYpHBO3OffEPkZnajZQRvz3S-z4';
-      final model = GenerativeModel(
-        model: 'gemini-1.5-flash-latest',
+      final GeminiAi _gemini = GeminiAi();
+      const apiKey = 'AIzaSyCoYXc-vW7x5hSuzYtwhMaJc6llVxfee7Y';
+      GenerativeModel generativeModel = GenerativeModel(
+        modelName: "gemini-pro",
         apiKey: apiKey,
       );
-
       final prompt =
-          'Descreva de maneira resumida se existe uma pessoa na imagem.';
-      var request = http.MultipartRequest('POST', Uri.parse(url));
-      request.files
-          .add(await http.MultipartFile.fromPath('image', pickedFile.path));
-      request.fields['prompt'] = prompt;
-      request.headers['Authorization'] = 'Bearer $apiKey';
-
-      var geminiResponse = await request.send();
-      if (geminiResponse.statusCode != 200) {
-        print('Erro ao gerar a descrição: ${geminiResponse.statusCode}');
-        return;
-      }
-
-      final geminiResponseBody = await geminiResponse.stream.bytesToString();
-      _sendImage(pickedFile);
-      _sendDescriptionImage(geminiResponseBody);
+          "Descreva a expressão facial da pessoa na imagem e o que ela está vestindo.";
+      final response = await _gemini.generateContent(
+        generativeModel,
+        prompt,
+        images: [File(pickedFile.path)],
+      );
+      await Future.wait([
+        _sendImage(pickedFile),
+        _sendDescriptionImage(response ?? ''),
+      ]);
     } catch (error) {
       print("Erro no processamento da imagem e descrição: $error");
     }
