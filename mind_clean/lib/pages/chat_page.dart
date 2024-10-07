@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:mind_clean/components/chat_balloon.dart';
 import 'package:mind_clean/models/chat.dart';
 import 'package:mind_clean/utils/app_routes.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
+
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Provider.of<ChatProvider>(context, listen: false).getMessages();
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,14 +49,16 @@ class ChatPage extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              reverse: true,
-              padding: const EdgeInsets.all(16.0),
-              itemCount: chatProvider.messages.length,
-              itemBuilder: (ctx, index) {
-                return chatProvider.messages[index];
-              },
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    reverse: true,
+                    padding: const EdgeInsets.all(16.0),
+                    itemCount: chatProvider.messages.length,
+                    itemBuilder: (ctx, index) {
+                      return chatProvider.messages[index];
+                    },
+                  ),
           ),
           Divider(color: Colors.white),
           Padding(

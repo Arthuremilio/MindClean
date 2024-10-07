@@ -3,13 +3,13 @@ import 'dart:io'; // Para trabalhar com arquivos locais de imagem
 
 class ChatBalloon extends StatelessWidget {
   final String? message; // Texto da mensagem
-  final File? image; // Arquivo de imagem (pode ser null se for texto)
+  final Image? image; // Arquivo de imagem (pode ser null se for texto)
   final bool isUserMessage;
 
   const ChatBalloon({
     Key? key,
-    this.message, // Texto pode ser null se for uma imagem
-    this.image, // Imagem pode ser null se for uma mensagem de texto
+    this.message,
+    this.image,
     required this.isUserMessage,
   }) : super(key: key);
 
@@ -30,28 +30,22 @@ class ChatBalloon extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: image != null // Verifica se é uma imagem
-                    ? Image.file(
-                        image!,
-                        fit: BoxFit.cover,
-                        height:
-                            150, // Ajuste a altura da imagem conforme necessário
-                      )
+                child: image != null
+                    ? image
                     : Text(
-                        message ?? '', // Se não for imagem, exibe o texto
+                        message ?? '',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
               ),
             ),
             CircleAvatar(
               radius: 20,
-              // Aqui você pode adicionar uma imagem/avatar do usuário
+              backgroundImage: AssetImage('lib/assets/img/user_logo.png'),
             ),
           ] else ...[
             CircleAvatar(
               radius: 20,
-              backgroundImage: AssetImage(
-                  'lib/assets/img/mind_clean_logo.png'), // Logo da aplicação
+              backgroundImage: AssetImage('lib/assets/img/mind_clean_logo.png'),
             ),
             Expanded(
               child: Container(
@@ -61,17 +55,12 @@ class ChatBalloon extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: message != null // Verifica se é uma mensagem de texto
+                child: message != null
                     ? Text(
                         message!,
                         style: Theme.of(context).textTheme.bodyLarge,
                       )
-                    : Image.file(
-                        image!,
-                        fit: BoxFit.cover,
-                        height:
-                            150, // Ajuste a altura da imagem conforme necessário
-                      ),
+                    : image,
               ),
             ),
           ],

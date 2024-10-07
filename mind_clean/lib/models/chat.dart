@@ -12,6 +12,45 @@ class ChatProvider with ChangeNotifier {
 
   List<ChatBalloon> get messages => _messages;
 
+  Future<void> getMessages() async {
+    _messages.clear();
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'https://mind-clean-default-rtdb.firebaseio.com/historyChat.json'),
+      );
+
+      if (response.body == 'null' || response.statusCode != 200) return;
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      data.forEach((key, value) {
+        if (value['image'] != null) {
+          final imageBytes = base64Decode(value['image']);
+          _messages.insert(
+            0,
+            ChatBalloon(
+              image: Image.memory(imageBytes),
+              isUserMessage: value['isUserMessage'] ?? true,
+            ),
+          );
+        } else if (value['Message'] != null) {
+          _messages.insert(
+            0,
+            ChatBalloon(
+              message: value['Message'],
+              isUserMessage: value['isUserMessage'] ?? false,
+            ),
+          );
+        }
+      });
+
+      notifyListeners();
+    } catch (error) {
+      print("Erro ao obter mensagens: $error");
+    }
+  }
+
   Future<void> sendImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     await _processImageAndSend(pickedFile);
@@ -42,7 +81,8 @@ class ChatProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         _messages.insert(
           0,
-          ChatBalloon(image: File(pickedFile.path), isUserMessage: true),
+          ChatBalloon(
+              image: Image.file(File(pickedFile.path)), isUserMessage: true),
         );
         notifyListeners();
       } else {
@@ -84,14 +124,18 @@ class ChatProvider with ChangeNotifier {
 
     try {
       final bytes = await pickedFile.readAsBytes();
-      final String base64Image = base64Encode(bytes);
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
         apiKey: 'AIzaSyCovP6pBChBYfg4KYHw5rPDAMUqqnd7VlU',
       );
       final prompt =
-          "Describe the image in Brazilian Portuguese: Base64: $base64Image";
-      final content = [Content.text(prompt)];
+          "Descreva de maneira resumida se existe uma pessoa na imagem";
+      final content = [
+        Content.multi([
+          TextPart(prompt),
+          DataPart('image/jpeg', bytes),
+        ])
+      ];
       final response = await model.generateContent(content);
       await _sendImage(pickedFile);
       await _sendDescriptionImage(response.text ?? '');

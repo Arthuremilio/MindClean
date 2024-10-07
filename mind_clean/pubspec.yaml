@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   cloud_firestore: ^5.4.4
   google_generative_ai: ^0.4.6
+  google_gemini: ^0.1.2
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,8 @@ flutter:
   assets:
     - lib/assets/img/mind_clean.png
     - lib/assets/img/mind_clean_logo.png
+    - lib/assets/img/user_logo.png
+    
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
