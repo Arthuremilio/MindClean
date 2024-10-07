@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mind_clean/models/auth.dart';
+import 'package:mind_clean/models/chat.dart';
 import 'package:mind_clean/pages/chat_page.dart';
 import 'package:mind_clean/pages/forgot_password_page.dart';
 import 'package:mind_clean/utils/app_routes.dart';
@@ -13,14 +14,16 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
           create: (_) => Auth(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(),
+        ),
       ],
       child: MaterialApp(
           title: 'Mind Clean',
