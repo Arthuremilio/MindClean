@@ -87,14 +87,14 @@ class ChatProvider with ChangeNotifier {
       final String base64Image = base64Encode(bytes);
       final model = GenerativeModel(
         model: 'gemini-1.5-flash-latest',
-        apiKey: 'AIzaSyCoYXc-vW7x5hSuzYtwhMaJc6llVxfee7Y',
+        apiKey: 'AIzaSyCovP6pBChBYfg4KYHw5rPDAMUqqnd7VlU',
       );
       final prompt =
           "Describe the image in Brazilian Portuguese: Base64: $base64Image";
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
-      await _sendDescriptionImage(response.text ?? '');
       await _sendImage(pickedFile);
+      await _sendDescriptionImage(response.text ?? '');
     } catch (error) {
       print("Erro no processamento da imagem e descrição: $error");
     }
