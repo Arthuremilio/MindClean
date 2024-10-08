@@ -71,4 +71,22 @@ class Auth with ChangeNotifier {
   Future<void> login(String email, String password) async {
     return _authenticate(email, password, 'signInWithPassword');
   }
+
+  Future<void> resetPassword(String email) async {
+    final url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyCKx4qV39NYsK442_KBGi-X14-l4oblfZ0';
+    final response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode({
+        'requestType': 'PASSWORD_RESET',
+        'email': email,
+      }),
+    );
+
+    final body = jsonDecode(response.body);
+
+    if (body['error'] != null && body['error']['message'] != null) {
+      throw AuthException(body['error']['message']);
+    }
+  }
 }

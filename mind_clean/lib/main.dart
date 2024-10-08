@@ -41,9 +41,9 @@ class MyApp extends StatelessWidget {
             ),
             textTheme: const TextTheme(
               // Definindo texto padrão e título
-              bodyLarge: TextStyle(color: Color(0xFFF5F5F5)), // Texto padrão
-              bodyMedium: TextStyle(color: Color(0xFFA7A9AF)), // Títulos
-              bodySmall: TextStyle(color: Color(0xFFA7A9AF)), // Títulos
+              bodyLarge: TextStyle(color: Color(0xFFF5F5F5)),
+              bodyMedium: TextStyle(color: Color(0xFFA7A9AF)), 
+              bodySmall: TextStyle(color: Color(0xFFA7A9AF)), 
             ),
             useMaterial3: true,
           ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mind_clean/models/auth.dart';
 
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
@@ -6,6 +8,28 @@ class ForgotPasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
+    final TextEditingController emailController = TextEditingController();
+    final auth = Provider.of<Auth>(context, listen: false);
+
+    Future<void> _resetPassword() async {
+      try {
+        await auth.resetPassword(emailController.text.trim());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email de recuperação enviado!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao enviar email: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -59,6 +83,7 @@ class ForgotPasswordPage extends StatelessWidget {
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: emailController,
                           decoration: InputDecoration(
                             labelText: 'E-mail',
                             fillColor: Colors.white,
@@ -73,7 +98,7 @@ class ForgotPasswordPage extends StatelessWidget {
                         Container(
                           width: deviceSize.width * 0.80,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: _resetPassword,
                             child: Text(
                               'Enviar',
                               style: TextStyle(color: Colors.white),
