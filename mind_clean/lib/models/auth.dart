@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mind_clean/exceptions/auth_exception.dart';
+import 'package:mind_clean/models/chat.dart';
+import 'package:provider/provider.dart';
 
 class Auth with ChangeNotifier {
   String? _token;
@@ -27,8 +29,8 @@ class Auth with ChangeNotifier {
     return isAuth ? _uid : null;
   }
 
-  Future<void> _authenticate(
-      String email, String password, String urlFragment) async {
+  Future<void> _authenticate(String email, String password, String urlFragment,
+      Function(String) onUserIdReceived) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:$urlFragment?key=AIzaSyCKx4qV39NYsK442_KBGi-X14-l4oblfZ0';
     final response = await http
@@ -46,8 +48,6 @@ class Auth with ChangeNotifier {
 
     final body = jsonDecode(response.body);
 
-    // print(body);
-
     if (body['error'] != null && body['error']['message'] != null) {
       throw AuthException(body['error']['message']);
     } else {
@@ -60,16 +60,21 @@ class Auth with ChangeNotifier {
           seconds: int.parse(body['expiresIn']),
         ),
       );
+      onUserIdReceived(_uid!);
+
       notifyListeners();
     }
   }
 
-  Future<void> signup(String email, String password) async {
-    return _authenticate(email, password, 'signUp');
+  Future<void> signup(
+      String email, String password, Function(String) onUserIdReceived) async {
+    return _authenticate(email, password, 'signUp', onUserIdReceived);
   }
 
-  Future<void> login(String email, String password) async {
-    return _authenticate(email, password, 'signInWithPassword');
+  Future<void> login(
+      String email, String password, Function(String) onUserIdReceived) async {
+    return _authenticate(
+        email, password, 'signInWithPassword', onUserIdReceived);
   }
 
   Future<void> resetPassword(String email) async {

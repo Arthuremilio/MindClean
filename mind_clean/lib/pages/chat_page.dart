@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mind_clean/models/auth.dart';
 import 'package:provider/provider.dart';
 import 'package:mind_clean/models/chat.dart';
 import 'package:mind_clean/utils/app_routes.dart';
@@ -16,14 +17,17 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = Provider.of<Auth>(context, listen: false).uid!;
+      _loadMessages(userId);
+    });
   }
 
-  Future<void> _loadMessages() async {
+  Future<void> _loadMessages(String userId) async {
     setState(() {
       _isLoading = true;
     });
-    await Provider.of<ChatProvider>(context, listen: false).getMessages();
+    await Provider.of<ChatProvider>(context, listen: false).getMessages(userId);
     setState(() {
       _isLoading = false;
     });
@@ -68,13 +72,15 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 FloatingActionButton(
                   heroTag: 'Gallery',
-                  onPressed: chatProvider.sendImageFromGallery,
+                  onPressed: () =>
+                      chatProvider.sendImageFromGallery(chatProvider.userId!),
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
                 FloatingActionButton(
                   heroTag: 'Camera',
-                  onPressed: chatProvider.sendImageFromCamera,
+                  onPressed: () =>
+                      chatProvider.sendImageFromCamera(chatProvider.userId!),
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.camera_alt, color: Colors.white),
                 ),

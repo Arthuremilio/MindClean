@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mind_clean/exceptions/auth_exception.dart';
 import 'package:mind_clean/models/auth.dart';
+import 'package:mind_clean/models/chat.dart';
 import 'package:mind_clean/utils/app_routes.dart';
 import 'package:provider/provider.dart';
 
@@ -59,16 +60,24 @@ class _AuthFormState extends State<AuthForm> {
 
     _formKey.currentState?.save();
     Auth auth = Provider.of(context, listen: false);
+    ChatProvider chatProvider =
+        Provider.of<ChatProvider>(context, listen: false);
     try {
       if (_isLogin()) {
         await auth.login(
           _authData['email']!,
           _authData['password']!,
+          (userId) {
+            chatProvider.setUserId(userId);
+          },
         );
       } else {
         await auth.signup(
           _authData['email']!,
           _authData['password']!,
+          (userId) {
+            chatProvider.setUserId(userId);
+          },
         );
       }
 

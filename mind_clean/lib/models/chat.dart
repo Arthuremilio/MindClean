@@ -7,12 +7,20 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import '../components/chat_balloon.dart';
 
 class ChatProvider with ChangeNotifier {
+  String? userId;
   final ImagePicker _picker = ImagePicker();
   final List<ChatBalloon> _messages = [];
 
   List<ChatBalloon> get messages => _messages;
 
-  Future<void> getMessages() async {
+  void setUserId(String id) {
+    userId = id;
+    notifyListeners();
+  }
+
+  // String get userId => id!;
+
+  Future<void> getMessages(String userId) async {
     _messages.clear();
     try {
       final response = await http.get(
@@ -25,23 +33,30 @@ class ChatProvider with ChangeNotifier {
       final Map<String, dynamic> data = jsonDecode(response.body);
 
       data.forEach((key, value) {
-        if (value['image'] != null) {
-          final imageBytes = base64Decode(value['image']);
-          _messages.insert(
-            0,
-            ChatBalloon(
-              image: Image.memory(imageBytes),
-              isUserMessage: value['isUserMessage'] ?? true,
-            ),
-          );
-        } else if (value['Message'] != null) {
-          _messages.insert(
-            0,
-            ChatBalloon(
-              message: value['Message'],
-              isUserMessage: value['isUserMessage'] ?? false,
-            ),
-          );
+        if (value['userId'] == userId) {
+          String timestamp = value['timestamp'];
+          DateTime messageTime = DateTime.parse(timestamp);
+
+          if (value['image'] != null) {
+            final imageBytes = base64Decode(value['image']);
+            _messages.insert(
+              0,
+              ChatBalloon(
+                image: Image.memory(imageBytes),
+                isUserMessage: value['isUserMessage'] ?? true,
+                timestamp: messageTime,
+              ),
+            );
+          } else if (value['Message'] != null) {
+            _messages.insert(
+              0,
+              ChatBalloon(
+                message: value['Message'],
+                isUserMessage: value['isUserMessage'] ?? false,
+                timestamp: messageTime,
+              ),
+            );
+          }
         }
       });
 
@@ -51,17 +66,17 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sendImageFromGallery() async {
+  Future<void> sendImageFromGallery(String userId) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    await _processImageAndSend(pickedFile);
+    await _processImageAndSend(pickedFile, userId);
   }
 
-  Future<void> sendImageFromCamera() async {
+  Future<void> sendImageFromCamera(String userId) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    await _processImageAndSend(pickedFile);
+    await _processImageAndSend(pickedFile, userId);
   }
 
-  Future<void> _sendImage(XFile? pickedFile) async {
+  Future<void> _sendImage(XFile? pickedFile, String userId) async {
     if (pickedFile == null) return;
 
     try {
@@ -75,6 +90,8 @@ class ChatProvider with ChangeNotifier {
         body: jsonEncode({
           "image": base64Image,
           "isUserMessage": true,
+          "userId": userId,
+          "timestamp": DateTime.now().toIso8601String(),
         }),
       );
 
@@ -82,7 +99,10 @@ class ChatProvider with ChangeNotifier {
         _messages.insert(
           0,
           ChatBalloon(
-              image: Image.file(File(pickedFile.path)), isUserMessage: true),
+            image: Image.file(File(pickedFile.path)),
+            isUserMessage: true,
+            timestamp: DateTime.now(),
+          ),
         );
         notifyListeners();
       } else {
@@ -93,33 +113,39 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _sendDescriptionImage(String description) async {
+  Future<void> _sendDescriptionImage(String description, String userId) async {
     try {
       final response = await http.post(
         Uri.parse(
             'https://mind-clean-default-rtdb.firebaseio.com/historyChat.json'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "Message": description,
+          "message": description,
           "isUserMessage": false,
+          "userId": userId,
+          "timestamp": DateTime.now().toIso8601String(),
         }),
       );
 
       if (response.statusCode == 200) {
         _messages.insert(
           0,
-          ChatBalloon(message: description, isUserMessage: false),
+          ChatBalloon(
+            message: description,
+            isUserMessage: false,
+            timestamp: DateTime.now(),
+          ),
         );
         notifyListeners();
       } else {
-        print('Erro ao enviar a imagem: ${response.statusCode}');
+        print('Erro ao enviar a descrição: ${response.statusCode}');
       }
     } catch (error) {
-      print("Erro ao enviar a imagem: $error");
+      print("Erro ao enviar a descrição: $error");
     }
   }
 
-  Future<void> _processImageAndSend(XFile? pickedFile) async {
+  Future<void> _processImageAndSend(XFile? pickedFile, String userId) async {
     if (pickedFile == null) return;
 
     try {
@@ -137,8 +163,8 @@ class ChatProvider with ChangeNotifier {
         ])
       ];
       final response = await model.generateContent(content);
-      await _sendImage(pickedFile);
-      await _sendDescriptionImage(response.text ?? '');
+      await _sendImage(pickedFile, userId);
+      await _sendDescriptionImage(response.text ?? '', userId);
     } catch (error) {
       print("Erro no processamento da imagem e descrição: $error");
     }
