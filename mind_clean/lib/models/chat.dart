@@ -18,8 +18,6 @@ class ChatProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // String get userId => id!;
-
   Future<void> getMessages(String userId) async {
     _messages.clear();
     try {

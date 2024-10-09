@@ -1,10 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mind_clean/exceptions/auth_exception.dart';
-import 'package:mind_clean/models/chat.dart';
-import 'package:provider/provider.dart';
 
 class Auth with ChangeNotifier {
   String? _token;

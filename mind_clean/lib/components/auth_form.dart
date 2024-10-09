@@ -108,17 +108,6 @@ class _AuthFormState extends State<AuthForm> {
           key: _formKey,
           child: Column(
             children: [
-              // TextField(
-              //   decoration: InputDecoration(
-              //     hintText: 'Nome',
-              //     labelText: 'Nome',
-              //     fillColor: Colors.white,
-              //     filled: true,
-              //     border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12)),
-              //   ),
-              //   style: TextStyle(color: Colors.black),
-              // ),
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(

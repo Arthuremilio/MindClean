@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ChatBalloon extends StatelessWidget {
   final String? message;
@@ -42,7 +43,7 @@ class ChatBalloon extends StatelessWidget {
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
+                      DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -80,10 +81,10 @@ class ChatBalloon extends StatelessWidget {
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
+                      DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ],
