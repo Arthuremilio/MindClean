@@ -45,11 +45,11 @@ class ChatProvider with ChangeNotifier {
                 timestamp: messageTime,
               ),
             );
-          } else if (value['Message'] != null) {
+          } else if (value['message'] != null) {
             _messages.insert(
               0,
               ChatBalloon(
-                message: value['Message'],
+                message: value['message'],
                 isUserMessage: value['isUserMessage'] ?? false,
                 timestamp: messageTime,
               ),
