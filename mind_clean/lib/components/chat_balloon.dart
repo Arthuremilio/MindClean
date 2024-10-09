@@ -42,11 +42,15 @@ class ChatBalloon extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     const SizedBox(height: 4),
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                    Align(
+                      alignment:
+                          Alignment.bottomRight, // Alinhando ao final (direita)
+                      child: Text(
+                        DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],
@@ -80,11 +84,15 @@ class ChatBalloon extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     const SizedBox(height: 4),
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                    Align(
+                      alignment:
+                          Alignment.bottomRight, // Alinhando ao final (direita)
+                      child: Text(
+                        DateFormat('dd/MM/yyyy HH:mm').format(timestamp),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],
